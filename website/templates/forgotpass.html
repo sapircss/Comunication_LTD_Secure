@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Forgot Password{% endblock %}
+{% block content %}
+<style>
+    .btn-color {
+        background-color: #0e1c36;
+        color: #fff;
+    }
+    .profile-image-pic {
+        height: 200px;
+        width: 200px;
+        object-fit: cover;
+    }
+    .cardbody-color {
+        background-color: #ebf2fa;
+    }
+    a {
+        text-decoration: none;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card my-5">
+                <form class="card-body cardbody-color p-lg-5" method="POST">
+                    <div class="text-center">
+                        <img src="https://cdn-icons-png.flaticon.com/512/6681/6681204.png"
+                             class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3"
+                             width="200px" alt="profile">
+                    </div>
+                    <h3 align="center">Reset Password</h3>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" id="email" name="email" aria-describedby="email"
+                               placeholder="test@gmail.com">
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-color px-5 mb-5 w-100">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

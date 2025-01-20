@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+<style>
+    .btn-color{
+        background-color: #0e1c36;
+        color: #fff;
+    }
+    .profile-image-pic{
+        height: 200px;
+        width: 200px;
+        object-fit: cover;
+    }
+    .cardbody-color{
+        background-color: #ebf2fa;
+    }
+    a{
+        text-decoration: none;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card my-5">
+                <form method="POST" class="card-body cardbody-color p-lg-5">
+                    <div class="text-center">
+                        <img src="https://cdn-icons-png.flaticon.com/512/6681/6681204.png" 
+                             class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3"
+                             width="200px" alt="profile">
+                    </div>
+                    <h3 align="center">Register</h3>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               placeholder="Enter email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id">ID</label>
+                        <input type="id" class="form-control" id="id" name="id" 
+                               placeholder="Enter id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" 
+                               placeholder="Enter first name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" 
+                               placeholder="Enter last name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password1">Password</label>
+                        <input type="password" class="form-control" id="password1" name="password1" 
+                               placeholder="Enter password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password2">Password (Confirm)</label>
+                        <input type="password" class="form-control" id="password2" name="password2" 
+                               placeholder="Confirm password" required>
+                    </div>
+                    <br />
+                    <button type="submit" class="btn btn-color px-5 mb-5 w-100">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

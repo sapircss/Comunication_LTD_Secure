@@ -1,0 +1,78 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+<!-- <div class ="header">
+  
+      <h1 align = "center">Communication LTD</h1>
+    </div>
+    <br />
+    <div class="text"  style="font-family:  'Times New Roman', Times, serif">
+      <p><b>Communication_LTD is a dynamic telecommunications company dedicated to providing top-notch internet browsing packages tailored to diverse customer needs. Our innovative offerings range from high-speed broadband to budget-friendly browsing options, ensuring seamless connectivity for individuals, families, and businesses alike.   </b> </p>
+      <p><b>Our extensive database is the backbone of our operations, housing critical information about our valued customers, the wide variety of browsing packages we offer, and the market sectors we proudly serve. This data enables us to provide personalized services, optimize user experiences, and deliver unmatched value across residential, corporate, and industrial sectors. </b></p>  
+      <p><b>At Communication_LTD, we are more than a service provider – we are your partner in navigating the digital world. </b></p>
+    </div id="container">
+    <div class="button" style="font-size: medium;">
+      <style>
+        #login, #Register{
+        width: 300px;
+        height: 40px;
+        } 
+        </style>
+
+    </div> -->
+
+<!-- Full Page Image Header with Vertically Centered Content -->
+
+<style>
+  .masthead {
+    height: 50vh;
+    min-height: 200px;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+</style>
+<header class="masthead">
+  <div class="container h-100">
+    <div class="row h-100 align-items-center">
+      <div class="col-12 text-center">
+        <h1 class="fw-light">Communication LTD</h1>
+        <p class="lead">Dynamic telecommunications company</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Page Content -->
+<section class="py-1">
+  <div class="container">
+    <h2 class="fw-light">About</h2>
+    <p>
+      Communication_LTD is a dynamic telecommunications company dedicated to
+      providing top-notch internet browsing packages tailored to diverse
+      customer needs. Our innovative offerings range from high-speed broadband
+      to budget-friendly browsing options, ensuring seamless connectivity for
+      individuals, families, and businesses alike.
+    </p>
+
+    <p>
+      Our extensive database is the backbone of our operations, housing critical
+      information about our valued customers, the wide variety of browsing
+      packages we offer, and the market sectors we proudly serve. This data
+      enables us to provide personalized services, optimize user experiences,
+      and deliver unmatched value across residential, corporate, and industrial
+      sectors.
+    </p>
+
+    <p>At Communication_LTD, we are more than a service provider – we are your partner in navigating the digital world.</p>
+  </div>
+</section>
+<div class="container text-center mt-3">
+  {% if session.get('user_email') %}
+  <form action="{{ url_for('auth.logout') }}" method="POST">
+      <button type="submit" class="btn btn-danger">Logout</button>
+  </form>
+  {% endif %}
+</div>
+
+{% endblock %}

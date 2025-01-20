@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}System{% endblock %}
+{% block content %}
+<style>
+    .btn-color {
+        background-color: #0e1c36;
+        color: #fff;
+    }
+    .cardbody-color {
+        background-color: #ebf2fa;
+    }
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+    table, th, td {
+        border: 1px solid black;
+    }
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+    .filter-bar {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .form-control {
+        display: inline-block;
+        width: auto;
+    }
+</style>
+
+<div class="container">
+    <!-- User Greeting Section -->
+    <div class="text-center mb-4">
+        <h4>Welcome, <span class="text-primary">{{ user_email }}</span></h4>
+    </div>
+
+    <!-- Logout Section -->
+    <div class="text-right mb-3">
+        <form action="{{ url_for('auth.logout') }}" method="POST">
+            <button type="submit" class="btn btn-color">Logout</button>
+        </form>
+    </div>
+
+    <!-- Add New Client Form -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <form method="POST" class="card-body cardbody-color" action="{{ url_for('views.add_client') }}">
+                    <h5 class="text-center mb-3">Add New Client</h5>
+                    <div class="form-group">
+                        <label for="id">Client ID:</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="id"
+                            name="id"
+                            placeholder="Enter Client ID"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="firstName"
+                            name="firstName"
+                            placeholder="Enter First Name"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="lastName"
+                            name="lastName"
+                            placeholder="Enter Last Name"
+                            required>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-color w-100">Add Client</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Client List Section -->
+        <div class="col-md-8">
+            <div class="filter-bar">
+                <h5>Client List</h5>
+                <form method="GET" action="{{ url_for('views.system') }}">
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="filter_id"
+                        value="{{ request.args.get('filter_id', '') }}"
+                        placeholder="Filter by Client ID">
+                    <button type="submit" class="btn btn-color ml-2">
+                        Filter
+                    </button>
+                    <button type="button" class="btn btn-secondary ml-2" id="reset-button">
+                        Reset
+                    </button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                    <tr>
+                        <td>{{ client.id }}</td>
+                        <td>{{ client.first_name }}</td>
+                        <td>{{ client.last_name }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- New Client Notification -->
+    {% if new_client %}
+    <div class="alert alert-success mt-3" role="alert">
+        New client added: {{ new_client.first_name }} {{ new_client.last_name }}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('reset-button').addEventListener('click', function() {
+        window.location.href = "{{ url_for('views.system') }}";
+    });
+</script>
+{% endblock %}
