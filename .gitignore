@@ -1,1 +1,25 @@
 instance/
+# Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Virtual environments
+venv/
+env/
+
+# Build and dist folders
+build/
+dist/
+
+# System files
+.DS_Store
+Thumbs.db
