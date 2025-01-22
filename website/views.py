@@ -1,61 +1,57 @@
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
-
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from db_manager import Database
-from .auth import login_required  # Added for route protection
+from .auth import login_required
 
 views = Blueprint('views', __name__)
 
 @views.route('/')
-#@login_required  
-# # SECURITY: Protect home page from unauthorized access
 def home():
-    return render_template("home.html", user_email=session.get('user_email')) #Passes user email from session to template
+    return render_template("home.html", user_email=session.get('user_email'))
 
-@views.route('/system', methods=['GET', 'POST'])
+@views.route('/system', methods=['GET'])
 @login_required
 def system():
     db = Database()
-    filter_id = request.args.get('filter_id')  # Get the filter ID from the query parameters
     clients = []
 
     try:
         db.create_table('clients')  # Ensure the `clients` table exists
+        filter_id = request.args.get('filter_id')  # Optional filter
 
-        if filter_id:  # If a filter ID is provided
+        if filter_id:
             db.cursor.execute("SELECT id, first_name, last_name FROM clients WHERE id = ?", (filter_id,))
         else:
             db.cursor.execute("SELECT id, first_name, last_name FROM clients")
         
         clients = [{'id': row[0], 'first_name': row[1], 'last_name': row[2]} for row in db.cursor.fetchall()]
-    except Exception as e:
-        print(f"Error fetching clients: {e}")
-        flash('An error occurred while fetching client data.', 'error')
     finally:
         db.close()
 
     return render_template("system.html", user_email=session.get('user_email'), clients=clients)
-
-
 
 @views.route('/addclient', methods=['POST'])
 @login_required
 def add_client():
     db = Database()
     try:
-        # Fetch and validate form data
-        client_data = db.fetch_user_data_from_add_clients_page()
-        if not client_data:
-            flash('Invalid input. Please check your entries.', 'error')
+        client_id = request.form.get('id', '').strip()
+        first_name = request.form.get('firstName', '').strip()
+        last_name = request.form.get('lastName', '').strip()
+
+        if not all([client_id, first_name, last_name]):
+            flash('All fields are required.', 'error')
             return redirect(url_for('views.system'))
 
-        # Add the client to the database
-        db.create_table('clients')  # Ensure the `clients` table exists
+        client_data = {
+            'id': client_id,
+            'first_name': first_name,
+            'last_name': last_name,
+        }
+
+        db.create_table('clients')
         db.insert_user_to_table('clients', client_data)
 
-        flash(f"Client {client_data['first_name']} {client_data['last_name']} added successfully!", 'success')
-    except Exception as e:
-        print(f"Error adding client: {e}")
-        flash('An error occurred while adding the client.', 'error')
+        flash(f"Client {first_name} {last_name} added successfully!", 'success')
     finally:
         db.close()
 

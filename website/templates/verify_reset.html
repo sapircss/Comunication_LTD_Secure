@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Change Password{% endblock %}
+{% block title %}Verify Reset Token{% endblock %}
 {% block content %}
 <style>
     .btn-color {
@@ -25,25 +25,17 @@
             <div class="card my-5">
                 <form class="card-body cardbody-color p-lg-5" method="POST">
                     <div class="text-center">
-                        <img src="https://cdn-icons-png.flaticon.com/512/6681/6681204.png" 
+                        <img src="https://cdn-icons-png.flaticon.com/512/6681/6681204.png"
                              class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3"
                              width="200px" alt="profile">
                     </div>
-                    <h3 align="center">Change Password</h3>
+                    <h3 align="center">Verify Reset Token</h3>
                     <div class="mb-3">
-                        <input type="password" class="form-control" id="oldPassword" name="oldPassword" 
-                               placeholder="Enter current password" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="password" class="form-control" id="newPassword" name="newPassword" 
-                               placeholder="Enter new password" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
-                               placeholder="Confirm new password" required>
+                        <input type="text" class="form-control" id="token" name="token" 
+                               placeholder="Enter reset token" required>
                     </div>
                     <div class="text-center">
-                        <button type="submit" class="btn btn-color px-5 mb-5 w-100">Change Password</button>
+                        <button type="submit" class="btn btn-color px-5 mb-5 w-100">Verify Token</button>
                     </div>
                 </form>
             </div>
