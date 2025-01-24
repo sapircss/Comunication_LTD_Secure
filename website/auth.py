@@ -57,17 +57,24 @@ def register():
         try:
             data = db.fetch_user_data_from_register_page()
             if not data:
-                return redirect(url_for('auth.register'))
+                # Pass the current form data (except password fields) back to the template
+                return render_template("register.html",
+                                       email=request.form.get('email', '').strip(),
+                                       id=request.form.get('id', '').strip(),
+                                       firstName=request.form.get('firstName', '').strip(),
+                                       lastName=request.form.get('lastName', '').strip(),
+                                       password_error=True)
 
             db.create_table('employees')
             db.insert_user_to_table('employees', data)
             flash('Registration successful!', 'success')
             return redirect(url_for('auth.login'))
         except Exception as e:
-            flash('An error occurred during registration.', 'error')
+            flash(f'An error occurred during registration: {e}', 'error')
         finally:
             db.close()
     return render_template("register.html")
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
