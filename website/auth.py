@@ -218,4 +218,3 @@ def changepass():
         finally:
             db.close()
     return render_template("changepass.html")
-

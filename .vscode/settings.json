@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./.venv/lib/python3.9/site-packages"
+    ],
+    "python.defaultInterpreterPath": "/Users/sapirshenhav/Desktop/Comunication_LTD-Secure-master/.venv/bin/python"
+}
