@@ -58,22 +58,29 @@ def register():
     if request.method == 'POST':
         db = Database()
         try:
-            data = db.fetch_user_data_from_register_page()
-            if not data:
-                # Pass the current form data (except password fields) back to the template
-                return render_template("register.html",
-                                       email=request.form.get('email', '').strip(),
-                                       id=request.form.get('id', '').strip(),
-                                       firstName=request.form.get('firstName', '').strip(),
-                                       lastName=request.form.get('lastName', '').strip(),
-                                       password_error=True)
+            data = {
+                'email': request.form.get('email', '').strip(),
+                'id': request.form.get('id', '').strip(),
+                'first_name': request.form.get('firstName', '').strip(),
+                'last_name': request.form.get('lastName', '').strip(),
+                'password': request.form.get('password1', '').strip()
+            }
 
+            # Check passwords match
+            if data['password'] != request.form.get('password2', '').strip():
+                flash('Passwords do not match.', 'error')
+                return render_template("register.html", **data)
+
+            # Insert validated data into database
             db.create_table('employees')
             db.insert_user_to_table('employees', data)
             flash('Registration successful!', 'success')
             return redirect(url_for('auth.login'))
+        except ValueError as ve:
+            flash(str(ve), 'error')
+            return render_template("register.html", **data)
         except Exception as e:
-            flash(f'An error occurred during registration: {e}', 'error')
+            flash(f"An error occurred: {e}", 'error')
         finally:
             db.close()
     return render_template("register.html")
