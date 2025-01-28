@@ -3,7 +3,6 @@ import sqlite3
 from flask import request, flash
 from prettytable import PrettyTable
 import bcrypt
-import bleach  # For input sanitization
 from markupsafe import escape
 import re
 
@@ -52,18 +51,17 @@ class Database:
         """Verifies a password against its hashed version."""
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
-    def _sanitize_input(self, data: dict) -> dict:
-        """Sanitizes input using bleach and blocks SQL injection patterns."""
-        forbidden_patterns = ["SELECT", "UNION", "INSERT", "DELETE", "UPDATE", "DROP", "--", ";", "'", '"']
-        sanitized_data = {}
-        for k, v in data.items():
-            if isinstance(v, str):
-                if any(pattern in v.lower() for pattern in forbidden_patterns):
-                    raise ValueError("Invalid input detected. Possible SQL Injection.")
-                sanitized_data[k] = escape(bleach.clean(v))
-            else:
-                sanitized_data[k] = v
-        return sanitized_data
+    def _validate_input(self, input_value: str) -> None:
+        """
+        Validates input to reject SQL injection and XSS patterns.
+        Rejects HTML tags and common SQL keywords.
+        """
+        if re.search(r"<.*?>", input_value):
+            raise ValueError("Input contains invalid HTML tags.")
+        
+        forbidden_patterns = ["--", ";", "'", '"', "/*", "*/", "xp_", "union", "select", "insert", "delete", "update", "drop", "alter"]
+        if any(pattern in input_value.lower() for pattern in forbidden_patterns):
+            raise ValueError("Input contains invalid SQL keywords or patterns.")
 
     def create_table(self, table_name: str) -> None:
         """Creates a table if it doesn't already exist."""
@@ -80,19 +78,20 @@ class Database:
     def insert_user_to_table(self, table_name: str, user_data: dict) -> None:
         """Inserts a user securely into the specified table."""
         try:
-            sanitized_data = self._sanitize_input(user_data)
-            if 'password' in sanitized_data:
-                sanitized_data['password'] = self._hash_password(sanitized_data['password'])
+            # Validate all user data fields before saving
+            for key, value in user_data.items():
+                if isinstance(value, str):
+                    self._validate_input(value)
+            
+            if 'password' in user_data:
+                user_data['password'] = self._hash_password(user_data['password'])
 
-            columns = ', '.join(sanitized_data.keys())
-            placeholders = ', '.join(['?' for _ in sanitized_data])
+            columns = ', '.join(user_data.keys())
+            placeholders = ', '.join(['?' for _ in user_data])
             query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
-            self._execute_query(query, tuple(sanitized_data.values()))
+            self._execute_query(query, tuple(user_data.values()))
         except sqlite3.IntegrityError as e:
             print(f"Error inserting user into '{table_name}': {escape(str(e))}")
-            raise
-        except ValueError as ve:
-            print(f"Input validation error: {escape(str(ve))}")
             raise
 
     def print_table(self, table_name: str) -> None:
@@ -132,6 +131,7 @@ class Database:
     def validate_user_login(self, email: str, password: str) -> bool:
         """Validates a user's login credentials securely."""
         try:
+            self._validate_input(email)
             self.cursor.execute("SELECT password FROM employees WHERE email = ?", (email,))
             result = self.cursor.fetchone()
             if result and self._verify_password(password, result[0]):
@@ -144,12 +144,16 @@ class Database:
     def fetch_user_data_from_register_page(self) -> dict:
         """Fetches and validates user data securely from the registration page."""
         try:
-            email = bleach.clean(request.form.get('email', '').strip())
-            user_id = bleach.clean(request.form.get('id', '').strip())
-            first_name = bleach.clean(request.form.get('firstName', '').strip())
-            last_name = bleach.clean(request.form.get('lastName', '').strip())
+            email = request.form.get('email', '').strip()
+            user_id = request.form.get('id', '').strip()
+            first_name = request.form.get('firstName', '').strip()
+            last_name = request.form.get('lastName', '').strip()
             password1 = request.form.get('password1', '').strip()
             password2 = request.form.get('password2', '').strip()
+
+            # Validate input fields
+            for value in [email, user_id, first_name, last_name, password1, password2]:
+                self._validate_input(value)
 
             if not all([email, user_id, first_name, last_name, password1, password2]):
                 flash('All fields are required.', 'error')
@@ -175,6 +179,9 @@ class Database:
                 'email': email,
             }
             return user_data
+        except ValueError as ve:
+            flash(str(ve), 'error')
+            return None
         except Exception as e:
             print(f"Error processing registration data: {escape(str(e))}")
             flash('An error occurred during registration.', 'error')
