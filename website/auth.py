@@ -19,10 +19,18 @@ with open('password_config.json', 'r') as f:
 SMTP_PROVIDERS = CONFIG['smtp_providers']
 
 def send_email(recipient: str, subject: str, body: str) -> bool:
+    """Send an email using the correct SMTP provider."""
     try:
-        smtp_provider = SMTP_PROVIDERS.get('gmail')
+        domain = recipient.split('@')[-1].lower()
+        smtp_provider = None
+
+        if "gmail.com" in domain:
+            smtp_provider = SMTP_PROVIDERS.get("gmail")
+        elif "hotmail.com" in domain:
+            smtp_provider = SMTP_PROVIDERS.get("hotmail")
+
         if not smtp_provider:
-            flash("SMTP configuration not found.", "error")
+            flash("SMTP configuration not found for this domain.", "error")
             return False
 
         msg = MIMEMultipart()
@@ -36,12 +44,13 @@ def send_email(recipient: str, subject: str, body: str) -> bool:
             server.login(smtp_provider['email_address'], smtp_provider['email_password'])
             server.sendmail(smtp_provider['email_address'], recipient, msg.as_string())
         return True
-    except smtplib.SMTPAuthenticationError:
-        flash("Authentication error. Please check your email credentials.", "error")
+    except smtplib.SMTPAuthenticationError as e:
+        flash(f"SMTP Authentication error: {e}", "error")
         return False
     except Exception as e:
-        flash("An unexpected error occurred while sending the email.", "error")
+        flash(f"An unexpected error occurred while sending the email: {e}", "error")
         return False
+
 
 def login_required(f):
     @wraps(f)
