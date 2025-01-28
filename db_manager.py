@@ -37,6 +37,7 @@ class Database:
     def _execute_query(self, query: str, params=()):
         """Executes a query using parameterized SQL to prevent SQL injection."""
         try:
+            print(f"Executing query: {query} with params: {params}")
             self.cursor.execute(query, params)
             self.conn.commit()
         except sqlite3.Error as e:
@@ -51,17 +52,23 @@ class Database:
         """Verifies a password against its hashed version."""
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
-    def _validate_input(self, input_value: str) -> None:
+    def _validate_input(self, input_value: str) -> bool:
         """
         Validates input to reject SQL injection and XSS patterns.
         Rejects HTML tags and common SQL keywords.
         """
         if re.search(r"<.*?>", input_value):
-            raise ValueError("Input contains invalid HTML tags.")
+            flash("Input contains invalid HTML tags.", "error")
+            print("XSS detected in input.")
+            return False
         
         forbidden_patterns = ["--", ";", "'", '"', "/*", "*/", "xp_", "union", "select", "insert", "delete", "update", "drop", "alter"]
         if any(pattern in input_value.lower() for pattern in forbidden_patterns):
-            raise ValueError("Input contains invalid SQL keywords or patterns.")
+            flash("Input contains invalid SQL keywords or patterns.", "error")
+            print(f"SQL Injection detected in input: {input_value}")
+            return False
+
+        return True
 
     def create_table(self, table_name: str) -> None:
         """Creates a table if it doesn't already exist."""
@@ -80,8 +87,8 @@ class Database:
         try:
             # Validate all user data fields before saving
             for key, value in user_data.items():
-                if isinstance(value, str):
-                    self._validate_input(value)
+                if isinstance(value, str) and not self._validate_input(value):
+                    return  # Skip insertion if validation fails
             
             if 'password' in user_data:
                 user_data['password'] = self._hash_password(user_data['password'])
@@ -91,14 +98,20 @@ class Database:
             query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
             self._execute_query(query, tuple(user_data.values()))
         except sqlite3.IntegrityError as e:
-            print(f"Error inserting user into '{table_name}': {escape(str(e))}")
-            raise
+            flash(f"Error inserting user into '{table_name}': Duplicate entry.", "error")
+            print(f"Database error: {escape(str(e))}")
+        except Exception as e:
+            flash("An unexpected error occurred while inserting data.", "error")
+            print(f"Unexpected error: {escape(str(e))}")
 
     def print_table(self, table_name: str) -> None:
         """Prints the contents of a table."""
         try:
-            self.cursor.execute(f"SELECT * FROM {table_name}")
+            query = f"SELECT * FROM {table_name}"
+            print(f"Printing table with query: {query}")
+            self.cursor.execute(query)
             rows = self.cursor.fetchall()
+
             if rows:
                 self.cursor.execute(f"PRAGMA table_info('{table_name}')")
                 columns_name = [info[1] for info in self.cursor.fetchall()]

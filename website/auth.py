@@ -7,7 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from db_manager import Database
 from functools import wraps
-from flask import session
 
 
 auth = Blueprint('auth', __name__)
@@ -55,8 +54,7 @@ def send_email(recipient: str, subject: str, body: str) -> bool:
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        #Check if Flask restarted (remove session data)
-        if not session.get('user_email'):
+        if not session.get('user_email'):  # Ensure user is logged in
             flash('Session expired. Please log in again.', 'error')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)

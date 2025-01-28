@@ -42,6 +42,11 @@ def add_client():
             flash('All fields are required.', 'error')
             return redirect(url_for('views.system'))
 
+        # Validate inputs before passing to the database
+        if not db._validate_input(client_id) or not db._validate_input(first_name) or not db._validate_input(last_name):
+            flash('Invalid input detected. Please check your values.', 'error')
+            return redirect(url_for('views.system'))
+
         client_data = {
             'id': client_id,
             'first_name': first_name,
