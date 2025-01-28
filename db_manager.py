@@ -52,12 +52,17 @@ class Database:
         """Verifies a password against its hashed version."""
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
+<<<<<<< HEAD
     def _validate_input(self, input_value: str) -> bool:
+=======
+    def _validate_input(self, input_value: str) -> None:
+>>>>>>> origin/main
         """
         Validates input to reject SQL injection and XSS patterns.
         Rejects HTML tags and common SQL keywords.
         """
         if re.search(r"<.*?>", input_value):
+<<<<<<< HEAD
             flash("Input contains invalid HTML tags.", "error")
             print("XSS detected in input.")
             return False
@@ -69,6 +74,13 @@ class Database:
             return False
 
         return True
+=======
+            raise ValueError("Input contains invalid HTML tags.")
+        
+        forbidden_patterns = ["--", ";", "'", '"', "/*", "*/", "xp_", "union", "select", "insert", "delete", "update", "drop", "alter"]
+        if any(pattern in input_value.lower() for pattern in forbidden_patterns):
+            raise ValueError("Input contains invalid SQL keywords or patterns.")
+>>>>>>> origin/main
 
     def create_table(self, table_name: str) -> None:
         """Creates a table if it doesn't already exist."""
@@ -87,8 +99,13 @@ class Database:
         try:
             # Validate all user data fields before saving
             for key, value in user_data.items():
+<<<<<<< HEAD
                 if isinstance(value, str) and not self._validate_input(value):
                     return  # Skip insertion if validation fails
+=======
+                if isinstance(value, str):
+                    self._validate_input(value)
+>>>>>>> origin/main
             
             if 'password' in user_data:
                 user_data['password'] = self._hash_password(user_data['password'])
@@ -98,11 +115,16 @@ class Database:
             query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
             self._execute_query(query, tuple(user_data.values()))
         except sqlite3.IntegrityError as e:
+<<<<<<< HEAD
             flash(f"Error inserting user into '{table_name}': Duplicate entry.", "error")
             print(f"Database error: {escape(str(e))}")
         except Exception as e:
             flash("An unexpected error occurred while inserting data.", "error")
             print(f"Unexpected error: {escape(str(e))}")
+=======
+            print(f"Error inserting user into '{table_name}': {escape(str(e))}")
+            raise
+>>>>>>> origin/main
 
     def print_table(self, table_name: str) -> None:
         """Prints the contents of a table."""

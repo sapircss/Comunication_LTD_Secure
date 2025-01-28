@@ -3,6 +3,7 @@ from flask_session import Session
 from datetime import timedelta
 import secrets
 import os
+<<<<<<< HEAD
 
 def clear_session_data():
     """Clears session data when the app starts."""
@@ -11,6 +12,8 @@ def clear_session_data():
         for file in os.listdir(session_dir):
             os.remove(os.path.join(session_dir, file))
         print("Session data cleared.")
+=======
+>>>>>>> origin/main
 
 def create_app():
     app = Flask(__name__)
@@ -35,12 +38,17 @@ def create_app():
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax',
         SESSION_TYPE="filesystem",  # Store sessions on the server
+<<<<<<< HEAD
         SESSION_FILE_DIR="instance/flask_session",  # Specify session directory
     )
 
     # Clear session data on app start
     clear_session_data()
 
+=======
+    )
+
+>>>>>>> origin/main
     # Initialize Flask-Session
     Session(app)
 
