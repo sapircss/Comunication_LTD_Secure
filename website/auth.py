@@ -7,8 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from db_manager import Database
 from functools import wraps
-from flask import session
-
 
 
 auth = Blueprint('auth', __name__)
@@ -20,7 +18,7 @@ with open('password_config.json', 'r') as f:
 SMTP_PROVIDERS = CONFIG['smtp_providers']
 
 def send_email(recipient: str, subject: str, body: str) -> bool:
-    """Send an email using the correct SMTP provider."""
+
     try:
         domain = recipient.split('@')[-1].lower()
         smtp_provider = None
@@ -56,12 +54,7 @@ def send_email(recipient: str, subject: str, body: str) -> bool:
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-<<<<<<< HEAD
         if not session.get('user_email'):  # Ensure user is logged in
-=======
-        #Check if Flask restarted (remove session data)
-        if not session.get('user_email'):
->>>>>>> origin/main
             flash('Session expired. Please log in again.', 'error')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
