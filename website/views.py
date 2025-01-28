@@ -38,15 +38,21 @@ def add_client():
         first_name = request.form.get('firstName', '').strip()
         last_name = request.form.get('lastName', '').strip()
 
+        # Ensure all fields are provided
         if not all([client_id, first_name, last_name]):
             flash('All fields are required.', 'error')
             return redirect(url_for('views.system'))
 
-        # Validate inputs before passing to the database
-        if not db._validate_input(client_id) or not db._validate_input(first_name) or not db._validate_input(last_name):
-            flash('Invalid input detected. Please check your values.', 'error')
+        # Validate inputs
+        try:
+            db._validate_input(client_id)
+            db._validate_input(first_name)
+            db._validate_input(last_name)
+        except ValueError as ve:
+            flash(str(ve), 'error')
             return redirect(url_for('views.system'))
 
+        # Prepare client data
         client_data = {
             'id': client_id,
             'first_name': first_name,
@@ -57,7 +63,12 @@ def add_client():
         db.insert_user_to_table('clients', client_data)
 
         flash(f"Client {first_name} {last_name} added successfully!", 'success')
+    except sqlite3.IntegrityError:
+        flash('Client with this ID already exists.', 'error')
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'error')
     finally:
         db.close()
 
     return redirect(url_for('views.system'))
+
