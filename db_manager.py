@@ -73,12 +73,12 @@ class Database:
         
         # Check for HTML tags to prevent XSS
         if re.search(r"<.*?>", input_value):
-            raise ValueError("Input contains invalid HTML tags.")
+            raise ValueError("Input contains invalid input.")
         
         # Check for forbidden SQL patterns to prevent SQL injection
         forbidden_patterns = ["--", ";--", "/*", "*/", "xp_", "union", "select", "insert", "delete", "update", "drop", "alter"]
         if any(pattern in input_value.lower() for pattern in forbidden_patterns):
-            raise ValueError("Input contains invalid SQL keywords or patterns.")
+            raise ValueError("Input contains invalid keywords or patterns.")
 
     def create_table(self, table_name: str) -> None:
         """
