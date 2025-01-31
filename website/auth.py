@@ -176,6 +176,87 @@ def changepass():
             db.close()
     return render_template("changepass.html")
 
+@auth.route('/forgotpass', methods=['GET', 'POST'])
+def forgotpass():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        if not email:
+            flash('Email is required.', 'error')  
+            return redirect(url_for('auth.forgotpass'))
+
+        db = Database()
+        try:
+            # Vulnerable SQL query - directly concatenates user input into query
+            db.cursor.execute(f"SELECT email FROM employees WHERE email = '{email}'")
+            if not db.cursor.fetchone():
+                flash('Email not found.', 'error')
+                return redirect(url_for('auth.forgotpass'))
+
+            random_value = str(random.randint(100000, 999999))  
+            sha1_hash = hashlib.sha1(random_value.encode()).hexdigest()
+
+            session['reset_token'] = sha1_hash
+            session['reset_email'] = email
+
+            email_body = f"Your password reset token is: {random_value}"  
+            if send_email(email, "Password Reset Request", email_body):
+                flash('A password reset token has been sent to your email.', 'success')
+                return redirect(url_for('auth.verify_reset'))
+        finally:
+            db.close()
+    return render_template("forgotpass.html")
+
+@auth.route('/verify_reset', methods=['GET', 'POST'])
+def verify_reset():
+    if request.method == 'POST':
+        token = request.form.get('token', '').strip()
+        if not token:
+            flash('Token is required.', 'error')
+            return redirect(url_for('auth.verify_reset'))
+
+        sha1_hash = hashlib.sha1(token.encode()).hexdigest()
+        if session.get('reset_token') == sha1_hash:
+            return redirect(url_for('auth.reset_password'))
+        else:
+            flash('Invalid or expired token.', 'error')
+            return redirect(url_for('auth.verify_reset'))
+    return render_template("verify_reset.html")
+
+@auth.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    """Handles password reset after verifying the token."""
+    if 'reset_email' not in session:
+        flash("Session expired. Please request a new password reset.", "error")
+        return redirect(url_for('auth.forgotpass'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('newPassword', '').strip()
+        confirm_password = request.form.get('confirmPassword', '').strip()
+
+        if not new_password or not confirm_password:
+            flash('Both fields are required.', 'error')
+            return redirect(url_for('auth.reset_password'))
+
+        if new_password != confirm_password:
+            flash('Passwords do not match.', 'error')
+            return redirect(url_for('auth.reset_password'))
+
+        db = Database()
+        try:
+            email = session.pop('reset_email')  # Remove from session for security
+            hashed_password = db._hash_password(new_password)
+
+            # Use parameterized query to prevent SQL injection
+            db._execute_query("UPDATE employees SET password = ? WHERE email = ?", (hashed_password, email))
+
+            flash("Password reset successfully! Please log in.", "success")
+            return redirect(url_for('auth.login'))  
+        finally:
+            db.close()
+
+    return render_template("reset_password.html")
+
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if 'user_email' in session:
